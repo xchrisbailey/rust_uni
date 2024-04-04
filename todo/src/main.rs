@@ -19,6 +19,7 @@ struct Cli {
     task: Option<String>,
 }
 
+// Create a new database and table for tasks
 fn setup_database() -> Result<()> {
     let conn = rusqlite::Connection::open("./tasks.db")?;
 
