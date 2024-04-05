@@ -1,3 +1,5 @@
+use rusqlite::{Connection, Result};
+
 // Add a task to the database
 pub fn add_task(conn: &Connection, task: &str) -> Result<()> {
     conn.execute(
