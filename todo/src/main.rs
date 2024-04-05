@@ -15,7 +15,7 @@ fn main() -> Result<()> {
     match &cli.command {
         Commands::Add { task } => add_task(&conn, task)?,
         Commands::Delete { id } => delete_task(&conn, *id)?,
-        Commands::Complete { id } => todo!(),
+        Commands::Complete { id } => complete_task(&conn, *id)?,
         Commands::All => todo!(),
         Commands::View { id } => todo!(),
     }
@@ -32,8 +32,15 @@ fn add_task(conn: &Connection, task: &str) -> Result<()> {
     Ok(())
 }
 
+// Delete a task from the database
 fn delete_task(conn: &Connection, id: i32) -> Result<()> {
     conn.execute("DELETE FROM tasks WHERE id = ?1", [id])?;
+    Ok(())
+}
+
+// Mark a task as complete
+fn complete_task(conn: &Connection, id: i32) -> Result<()> {
+    conn.execute("UPDATE tasks SET status = 1 WHERE id = ?1", [id])?;
     Ok(())
 }
 
