@@ -1,3 +1,4 @@
+use colored::Colorize;
 use comfy_table::{Cell, Row, Table};
 use rusqlite::Connection;
 
@@ -34,19 +35,10 @@ pub fn get_all_tasks(conn: &Connection) -> rusqlite::Result<()> {
     })?;
 
     let mut tasks: Vec<comfy_table::Row> = Vec::new();
-
     for task in task_iter {
-        let Task { id, task, status } = task.unwrap();
-        let value = vec![
-            Cell::new(id),
-            Cell::new(task),
-            Cell::new(match status {
-                true => "finsihed",
-                false => "pending",
-            }),
-        ];
-        tasks.push(Row::from(value));
+        tasks.push(Row::from(task?.table_cell()));
     }
+
     let mut table = Table::new();
     table
         .set_header(vec!["ID", "Task", "Status"])
@@ -84,12 +76,23 @@ impl Task {
     fn print(&self) {
         println!(
             "{}: {} - {}",
-            self.id,
-            self.task,
+            self.id.to_string().green(),
+            self.task.bold().purple(),
             match self.status {
-                true => "finsihed",
-                false => "pending",
+                true => "finsihed".strikethrough().red(),
+                false => "pending".underline().yellow(),
             }
         );
+    }
+
+    fn table_cell(&self) -> Vec<Cell> {
+        vec![
+            Cell::new(self.id),
+            Cell::new(self.task.clone()),
+            Cell::new(match self.status {
+                true => "finsihed",
+                false => "pending",
+            }),
+        ]
     }
 }
