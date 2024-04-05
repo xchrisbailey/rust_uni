@@ -55,7 +55,7 @@ fn get_all_tasks(conn: &Connection) -> Result<()> {
         })
     })?;
     for task in task_iter {
-        print_task(task?);
+        task?.print();
     }
     Ok(())
 }
@@ -70,20 +70,8 @@ fn get_task_by_id(conn: &Connection, id: i32) -> Result<()> {
             status: row.get(2)?,
         })
     })?;
-    print_task(task);
+    task.print();
     Ok(())
-}
-
-fn print_task(task: Task) {
-    println!(
-        "{}: {} - {}",
-        task.id,
-        task.task,
-        match task.status {
-            true => "finsihed",
-            false => "pending",
-        }
-    );
 }
 
 #[derive(Debug)]
@@ -91,6 +79,24 @@ struct Task {
     id: i32,
     task: String,
     status: bool,
+}
+
+impl Task {
+    // fn new(id: i32, task: String, status: bool) -> Task {
+    //     Task { id, task, status }
+    // }
+
+    fn print(&self) {
+        println!(
+            "{}: {} - {}",
+            self.id,
+            self.task,
+            match self.status {
+                true => "finsihed",
+                false => "pending",
+            }
+        );
+    }
 }
 
 #[derive(Parser)]
