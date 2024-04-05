@@ -17,7 +17,7 @@ fn main() -> Result<()> {
         Commands::Delete { id } => delete_task(&conn, *id)?,
         Commands::Complete { id } => complete_task(&conn, *id)?,
         Commands::All => get_all_tasks(&conn)?,
-        Commands::View { id } => todo!(),
+        Commands::View { id } => get_task_by_id(&conn, *id)?,
     }
 
     Ok(())
@@ -55,18 +55,35 @@ fn get_all_tasks(conn: &Connection) -> Result<()> {
         })
     })?;
     for task in task_iter {
-        let Task { id, task, status } = task?;
-        println!(
-            "{}: {} - {}",
-            id,
-            task,
-            match status {
-                true => "finsihed",
-                false => "pending",
-            }
-        );
+        print_task(task?);
     }
     Ok(())
+}
+
+// Find single task by id
+fn get_task_by_id(conn: &Connection, id: i32) -> Result<()> {
+    let mut stmt = conn.prepare("SELECT * FROM tasks WHERE id = ?1")?;
+    let task = stmt.query_row([id], |row| {
+        Ok(Task {
+            id: row.get(0)?,
+            task: row.get(1)?,
+            status: row.get(2)?,
+        })
+    })?;
+    print_task(task);
+    Ok(())
+}
+
+fn print_task(task: Task) {
+    println!(
+        "{}: {} - {}",
+        task.id,
+        task.task,
+        match task.status {
+            true => "finsihed",
+            false => "pending",
+        }
+    );
 }
 
 #[derive(Debug)]
