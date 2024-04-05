@@ -13,14 +13,21 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
 
     match &cli.command {
-        Commands::Add { task } => {
-            conn.execute(
-                "INSERT INTO tasks (task, status) VALUES (?1, ?2)",
-                (task, 0),
-            )?;
-        }
+        Commands::Add { task } => add_task(&conn, task)?,
+        Commands::Delete { id } => todo!(),
+        Commands::Complete { id } => todo!(),
+        Commands::All => todo!(),
+        Commands::View { id } => todo!(),
     }
 
+    Ok(())
+}
+
+fn add_task(conn: &Connection, task: &str) -> Result<()> {
+    conn.execute(
+        "INSERT INTO tasks (task, status) VALUES (?1, ?2)",
+        (task, 0),
+    )?;
     Ok(())
 }
 
@@ -34,6 +41,10 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     Add { task: String },
+    Delete { id: i32 },
+    Complete { id: i32 },
+    All,
+    View { id: i32 },
 }
 
 // Create a new database and table for tasks
