@@ -16,7 +16,7 @@ fn main() -> Result<()> {
         Commands::Add { task } => add_task(&conn, task)?,
         Commands::Delete { id } => delete_task(&conn, *id)?,
         Commands::Complete { id } => complete_task(&conn, *id)?,
-        Commands::All => todo!(),
+        Commands::All => get_all_tasks(&conn)?,
         Commands::View { id } => todo!(),
     }
 
@@ -42,6 +42,38 @@ fn delete_task(conn: &Connection, id: i32) -> Result<()> {
 fn complete_task(conn: &Connection, id: i32) -> Result<()> {
     conn.execute("UPDATE tasks SET status = 1 WHERE id = ?1", [id])?;
     Ok(())
+}
+
+// Get all tasks from the database
+fn get_all_tasks(conn: &Connection) -> Result<()> {
+    let mut stmt = conn.prepare("SELECT * FROM tasks")?;
+    let task_iter = stmt.query_map([], |row| {
+        Ok(Task {
+            id: row.get(0)?,
+            task: row.get(1)?,
+            status: row.get(2)?,
+        })
+    })?;
+    for task in task_iter {
+        let Task { id, task, status } = task?;
+        println!(
+            "{}: {} - {}",
+            id,
+            task,
+            match status {
+                true => "finsihed",
+                false => "pending",
+            }
+        );
+    }
+    Ok(())
+}
+
+#[derive(Debug)]
+struct Task {
+    id: i32,
+    task: String,
+    status: bool,
 }
 
 #[derive(Parser)]
