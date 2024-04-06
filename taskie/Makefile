@@ -1,4 +1,4 @@
-prog :=taskie
+program_name :=taskie
 
 debug ?=
 
@@ -18,7 +18,7 @@ build:
 	cargo build $(release)
 
 install:
-	cp target/$(target)/$(prog) ~/bin/$(prog)-$(extension)
+	cp target/$(target)/$(program_name) ~/bin/$(program_name)
 
 all: test build install
 
@@ -26,4 +26,4 @@ test:
 	cargo test
  
 help:
-	@echo "usage: make $(prog) [debug=1]"
+	@echo "usage: make $(program_name) [debug=1]"
