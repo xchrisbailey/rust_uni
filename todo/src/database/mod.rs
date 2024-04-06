@@ -36,3 +36,16 @@ fn get_db_path() -> Result<String, std::io::Error> {
         ))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn gets_user_home_dir() {
+        match get_db_path() {
+            Ok(d) => assert!(d.contains("task.db")),
+            Err(e) => panic!("{}", e),
+        }
+    }
+}
