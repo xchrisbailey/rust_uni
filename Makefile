@@ -1,5 +1,5 @@
 taskie-test:
 	cd taskie && $(MAKE) test
 
-taskie:
+taskie-all:
 	cd taskie && $(MAKE) all
