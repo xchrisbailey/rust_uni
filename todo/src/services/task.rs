@@ -1,5 +1,4 @@
 use colored::Colorize;
-use comfy_table::{Cell, Row, Table};
 use rusqlite::Connection;
 
 // Add a task to the database
@@ -34,16 +33,16 @@ pub fn get_all_tasks(conn: &Connection) -> rusqlite::Result<()> {
         })
     })?;
 
-    let mut tasks: Vec<comfy_table::Row> = Vec::new();
-    for task in task_iter {
-        tasks.push(Row::from(task?.table_cell()));
-    }
+    println!(
+        "{}\t{}\t\t{}",
+        "ID".bold(),
+        "Status  ".bold(),
+        "Task".bold(),
+    );
 
-    let mut table = Table::new();
-    table
-        .set_header(vec!["ID", "Task", "Status"])
-        .add_rows(tasks);
-    println!("{}", table);
+    for task in task_iter {
+        print!("{}", task?.to_string());
+    }
     Ok(())
 }
 
@@ -57,7 +56,7 @@ pub fn get_task_by_id(conn: &Connection, id: i32) -> rusqlite::Result<()> {
             status: row.get(2)?,
         })
     })?;
-    task.print();
+    println!("{}", task.to_string());
     Ok(())
 }
 
@@ -68,31 +67,32 @@ struct Task {
     status: bool,
 }
 
-impl Task {
-    // fn new(id: i32, task: String, status: bool) -> Task {
-    //     Task { id, task, status }
-    // }
-
-    fn print(&self) {
-        println!(
-            "{}: {} - {}",
-            self.id.to_string().green(),
-            self.task.bold().purple(),
-            match self.status {
-                true => "finsihed".strikethrough().red(),
-                false => "pending".underline().yellow(),
-            }
-        );
-    }
-
-    fn table_cell(&self) -> Vec<Cell> {
-        vec![
-            Cell::new(self.id),
-            Cell::new(self.task.clone()),
-            Cell::new(match self.status {
-                true => "finsihed",
-                false => "pending",
-            }),
-        ]
+// Implement the ToString trait for Task
+impl ToString for Task {
+    fn to_string(&self) -> String {
+        match self.status == true {
+            // if task is finished
+            true => format!(
+                "{}\t{}\t\t{}\n",
+                self.id.to_string().blue().bold(),
+                match self.status {
+                    true => "finsihed".red(),
+                    false => "pending".yellow(),
+                },
+                self.task.blue(),
+            )
+            .strikethrough()
+            .to_string(),
+            // if task is pending
+            false => format!(
+                "{}\t{}\t\t{}\n",
+                self.id.to_string().blue().bold(),
+                match self.status {
+                    true => "finsihed".red(),
+                    false => "pending ".yellow(),
+                },
+                self.task.blue(),
+            ),
+        }
     }
 }
