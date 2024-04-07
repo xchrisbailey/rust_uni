@@ -1,5 +1,11 @@
 taskie-test:
-	cd taskie && $(MAKE) test
+	cargo test -p taskie
+
+taskie-build:
+	cargo build --release -p taskie
+
+taskie-install:
+	cp target/release/taskie ~/bin/taskie
 
 taskie-all:
-	cd taskie && $(MAKE) all
+	taskie-test taskie-build taskie-install
