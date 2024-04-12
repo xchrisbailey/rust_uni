@@ -1,5 +1,3 @@
-use std::net::SocketAddr;
-
 use askama::Template;
 use axum::{
     http::StatusCode,
@@ -7,6 +5,7 @@ use axum::{
     routing::get,
     Router,
 };
+use tokio::net::TcpListener;
 use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -15,7 +14,7 @@ async fn main() {
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "wins=debug".into()),
+                .unwrap_or_else(|_| "wins=debug,tower_http=debug,axum::rejection=trace".into()),
         )
         .with(tracing_subscriber::fmt::layer())
         .init();
@@ -24,9 +23,8 @@ async fn main() {
 
     let app = Router::new().route("/", get(index));
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
-    tracing::debug!("listening on {addr}");
-    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
+    let listener = TcpListener::bind("127.0.0.1:3000").await.unwrap();
+    tracing::debug!("listening on {}", listener.local_addr().unwrap());
     axum::serve(listener, app).await.unwrap();
 }
 
