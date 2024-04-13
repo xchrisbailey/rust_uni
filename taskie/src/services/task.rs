@@ -41,7 +41,7 @@ pub fn get_all_tasks(conn: &Connection) -> rusqlite::Result<()> {
     );
 
     for task in task_iter {
-        print!("{}", task?.to_string());
+        println!("{}\n", task?);
     }
     Ok(())
 }
@@ -56,7 +56,7 @@ pub fn get_task_by_id(conn: &Connection, id: i32) -> rusqlite::Result<()> {
             status: row.get(2)?,
         })
     })?;
-    println!("{}", task.to_string());
+    println!("{}", task);
     Ok(())
 }
 
@@ -67,30 +67,21 @@ struct Task {
     status: bool,
 }
 
-// Implement the ToString trait for Task
-impl ToString for Task {
-    fn to_string(&self) -> String {
+impl std::fmt::Display for Task {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self.status {
-            // if task is finished
-            true => format!(
-                "{}\t{}\t\t{}\n",
+            true => write!(
+                f,
+                "{}\t{}\t\t{}",
+                self.id.to_string().blue().bold().strikethrough(),
+                "finished".red().strikethrough(),
+                self.task.blue().strikethrough(),
+            ),
+            false => write!(
+                f,
+                "{}\t{}\t\t{}",
                 self.id.to_string().blue().bold(),
-                match self.status {
-                    true => "finsihed".red(),
-                    false => "pending".yellow(),
-                },
-                self.task.blue(),
-            )
-            .strikethrough()
-            .to_string(),
-            // if task is pending
-            false => format!(
-                "{}\t{}\t\t{}\n",
-                self.id.to_string().blue().bold(),
-                match self.status {
-                    true => "finsihed".red(),
-                    false => "pending ".yellow(),
-                },
+                "pending".yellow(),
                 self.task.blue(),
             ),
         }
