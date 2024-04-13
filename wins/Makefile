@@ -5,4 +5,4 @@ lint:
 docker-build:
 	docker build -t wins .
 docker-run:
-	docker run -it wins
+	docker run -p 3000:3000 --rm -it wins 
