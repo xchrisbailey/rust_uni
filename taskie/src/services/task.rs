@@ -70,7 +70,7 @@ struct Task {
 // Implement the ToString trait for Task
 impl ToString for Task {
     fn to_string(&self) -> String {
-        match self.status == true {
+        match self.status {
             // if task is finished
             true => format!(
                 "{}\t{}\t\t{}\n",
