@@ -9,16 +9,18 @@ use regex::Regex;
 
 fn main() -> Result<()> {
     let mut args = env::args();
+
     let binding = args.nth(1).expect("Expected a path argument");
+    let files = collect_files(Path::new(&binding))?;
+
     let pattern: &str = &args.next().expect("Expected a pattern argument");
-    let path = Path::new(&binding);
-    let files = collect_files(path)?;
 
     for file in files {
-        let f = File::open(&file).expect("Could not open file");
-        let buf = BufReader::new(f).lines();
-        let reg = Regex::new(pattern).expect("Invalid pattern");
-        let matches = match_pattern(buf, reg)?;
+        let matches = match_pattern(
+            BufReader::new(File::open(&file).expect("Could not open file")).lines(),
+            Regex::new(pattern).expect("Invalid pattern"),
+        )?;
+
         if !matches.is_empty() {
             println!("File: {:?}", file);
             for line in matches {
