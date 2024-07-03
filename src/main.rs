@@ -56,5 +56,59 @@ fn collect_files(dir: &Path) -> Result<Vec<PathBuf>> {
             all_files.push(path.to_path_buf());
         }
     }
+
+    all_files.sort();
+
     Ok(all_files)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::fs::create_dir;
+
+    #[test]
+    fn test_collect_files_with_empty_directory() {
+        let temp_dir = tempfile::tempdir().expect("Failed to create temporary directory");
+        let dir_path = temp_dir.path().join("empty_dir");
+        create_dir(&dir_path).expect("Failed to create empty directory");
+
+        let result = collect_files(&dir_path);
+
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), Vec::<PathBuf>::new());
+    }
+
+    #[test]
+    fn test_collect_files_with_single_file() {
+        let temp_dir = tempfile::tempdir().expect("Failed to create temporary directory");
+        let file_path = temp_dir.path().join("file.txt");
+        File::create(&file_path).expect("Failed to create file");
+
+        let result = collect_files(temp_dir.path());
+
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), vec![file_path]);
+    }
+
+    #[test]
+    fn test_collect_files_with_nested_directories() {
+        let temp_dir = tempfile::tempdir().expect("Failed to create temporary directory");
+        let dir_path = temp_dir.path().join("nested_dir");
+        create_dir(&dir_path).expect("Failed to create nested directory");
+
+        let sub_dir_path = dir_path.join("sub_dir");
+        create_dir(&sub_dir_path).expect("Failed to create sub directory");
+
+        let file_path1 = dir_path.join("file1.txt");
+        File::create(&file_path1).expect("Failed to create file1");
+
+        let file_path2 = sub_dir_path.join("file2.txt");
+        File::create(&file_path2).expect("Failed to create file2");
+
+        let result = collect_files(temp_dir.path());
+
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), vec![file_path1, file_path2]);
+    }
 }
